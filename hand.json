@@ -1,0 +1,56 @@
+{
+  "hero": "player1",
+  "stacks": [
+    {"player1": "1000"},
+    {"player2": "1000"},
+    {"player3": "1000"},
+    {"player4": "1000"},
+    {"player5": "1000"},
+    {"player6": "1000"},
+  ],
+  "preflop": {
+    "hole_cards": "As, Ac",
+    "betting_actions": [
+      {"player1": "5"},
+      {"player2": "10"},
+      {"player3": "fold"},
+      {"player4": "10"},
+      {"player5": "20"},
+      {"player6": "20"},
+      {"player1": "35"},
+      {"player2": "fold"},
+      {"player4": "fold"},
+      {"player5": "20"},
+      {"player6": "20"},
+    ],
+  },
+  "flop": {
+    "board": "Ad, Ah, 2s",
+    "betting_actions": [
+      {"player1": "100"},
+      {"player5": "100"},
+      {"player6": "fold"},
+    ],
+  },
+  "turn": {
+    "board": "2d",
+    "betting_actions": [
+      {"player1": "check"},
+      {"player5": "check"},
+    ],
+  },
+  "river": {
+    "board": "5s",
+    "betting_actions": [
+      {"player1": "860"},
+      {"player5": "860"},
+    ],
+  },
+  "showdown": {
+    "player1": "As, Ac",
+    "player5": "muck"
+  }
+}
+
+
+
