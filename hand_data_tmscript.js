@@ -6,15 +6,18 @@
 // @author       You
 // @match        https://poker.betonline.ag/desktoppoker/index.htm?ID=*
 // @grant        none
+// @require http://code.jquery.com/jquery-3.3.1.min.js
+// @require https://goessner.net/download/prj/jsonxml/json2xml.js
+// @require https://goessner.net/download/prj/jsonxml/xml2json.js
 // ==/UserScript==
 
 (function() {
     'use strict';
-    console.log("Starting Userscript")
     var OrigWebSocket = window.WebSocket;
     var callWebSocket = OrigWebSocket.apply.bind(OrigWebSocket);
     var wsAddListener = OrigWebSocket.prototype.addEventListener;
     wsAddListener = wsAddListener.call.bind(wsAddListener);
+    var table_id = location.search.substr(4);
     window.WebSocket = function WebSocket(url, protocols) {
         var ws;
         if (!(this instanceof WebSocket)) {
@@ -27,11 +30,15 @@
         } else { // No arguments (browsers will throw an error)
             ws = new OrigWebSocket();
         }
-
+        // Do something with event.data (received data) if you wish.
         wsAddListener(ws, 'message', function(event) {
-            // TODO: Do something with event.data (received data) if you wish.
-            console.log(location.search)
-            console.log(event.data)
+            // Do something with event.data (received data) if you wish.
+            var message = event.data;
+            var xmlDoc = $.parseXML(message);
+            var json = xml2json(xmlDoc);
+            var str = JSON.stringify(json).replace('undefined','');
+            json = JSON.parse(str);
+            console.log(json);
         });
         return ws;
     }.bind();
