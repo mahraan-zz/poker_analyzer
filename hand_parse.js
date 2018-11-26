@@ -168,6 +168,8 @@ $(document).ready(function(){
     }
     resetHand(hand)
 
+    console.log(d)
+
     // initialize stacks, players, and table meta-data
     $(d).find("TableDetails").each(function(){
 
