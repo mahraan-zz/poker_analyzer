@@ -6,7 +6,7 @@
 // @author       You
 // @match        https://poker.betonline.ag/desktoppoker/index.htm?ID=*
 // @grant        none
-// @require http://code.jquery.com/jquery-3.3.1.min.js
+// @require https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js
 // @require https://goessner.net/download/prj/jsonxml/json2xml.js
 // @require https://goessner.net/download/prj/jsonxml/xml2json.js
 // ==/UserScript==
@@ -17,7 +17,9 @@
     var callWebSocket = OrigWebSocket.apply.bind(OrigWebSocket);
     var wsAddListener = OrigWebSocket.prototype.addEventListener;
     wsAddListener = wsAddListener.call.bind(wsAddListener);
-    var table_id = location.search.substr(4);
+    var table_id = location.search.substr(4),
+        players = {},
+        stacks = {};
     window.WebSocket = function WebSocket(url, protocols) {
         var ws;
         if (!(this instanceof WebSocket)) {
@@ -34,11 +36,33 @@
         wsAddListener(ws, 'message', function(event) {
             // Do something with event.data (received data) if you wish.
             var message = event.data;
-            var xmlDoc = $.parseXML(message);
-            var json = xml2json(xmlDoc);
-            var str = JSON.stringify(json).replace('undefined','');
-            json = JSON.parse(str);
-            console.log(json);
+            var xmlDoc = $.parseXML(message),
+                $xml = $(xmlDoc).find("*").eq(0),
+                root = $xml[0],
+                rootTitle = root.nodeName;
+            if(rootTitle == "TableDetails"){
+                var $seats = $(xmlDoc).find("Seats");
+                $seats.children().each(function(){
+                    var id = $(this).attr('id'),
+                        playerInfo = $(this).find("PlayerInfo"),
+                        nickname = playerInfo.attr("nickname"),
+                        stack = $(this).find("Chips").attr("stack-size");
+                    players[id] = nickname;
+                    if(nickname != null){
+                        stacks[nickname] = stack;
+                    }
+                });
+                console.log(players);
+                console.log(stacks);
+            }
+            else if(rootTitle == "PlayerInfo"){
+                //console.log(rootTitle);
+                //console.log(root);
+            }
+            else if(rootTitle == "Message"){
+                //console.log(rootTitle);
+                //console.log(root);
+            }
         });
         return ws;
     }.bind();

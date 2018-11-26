@@ -1,21 +1,22 @@
 {
   "hero": "player1",
-  "table_details":{
+  "tableDetails": {
     "game":"TEXAS_HOLDEM",
     "mode":"REALMONEY",
-    "limit":"NO_LIMIT"
-  }
-  "stacks": [
-    {"player1": "1000"},
-    {"player2": "1000"},
-    {"player3": "1000"},
-    {"player4": "1000"},
-    {"player5": "1000"},
-    {"player6": "1000"},
-  ],
-  "preflop": {
-    "hero_hole_cards": "As, Ac",
-    "actions": [
+    "limit":"NO_LIMIT",
+  },
+  "rake":"0",
+  "stacks": {
+    "player1": "1000",
+    "player2": "1000",
+    "player3": "1000",
+    "player4": "1000",
+    "player5": "1000",
+    "player6": "1000"
+  },
+  "board": "Ad, Ah, 2s, 2d, 5s",
+  "heroHoleCards": "As, Ac",
+  "preflop": [
       {"player1": "5"},
       {"player2": "10"},
       {"player3": "fold"},
@@ -26,35 +27,29 @@
       {"player2": "fold"},
       {"player4": "fold"},
       {"player5": "20"},
-      {"player6": "20"},
-    ],
+      {"player6": "20"}
+    ]
   },
-  "flop": {
-    "board": "Ad, Ah, 2s",
-    "actions": [
+  "flop": [
       {"player1": "100"},
       {"player5": "100"},
-      {"player6": "fold"},
-    ],
+      {"player6": "fold"}
+    ]
   },
-  "turn": {
-    "board": "2d",
-    "actions": [
+  "turn": [
       {"player1": "check"},
-      {"player5": "check"},
-    ],
+      {"player5": "check"}
+    ]
   },
-  "river": {
-    "board": "5s",
-    "actions": [
+  "river": [
       {"player1": "860"},
-      {"player5": "860"},
-    ],
+      {"player5": "860"}
+    ]
   },
-  "showdown": {
+  "showdown": [
     "player1": "As, Ac",
     "player5": "muck"
-  }
+  ]
 }
 
 
