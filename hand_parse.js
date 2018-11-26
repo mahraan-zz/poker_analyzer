@@ -1,19 +1,9 @@
 $(document).ready(function(){
   "use strict"
 
-  $.get("sample_hand.xml", function(d){
+  $.get("sample_hand2.xml", function(d){
 
     $("body").append("<h1> Hand Data </h1>")
-
-    var players = {
-      "0": "Madeinch1na",
-      "1": undefined,
-      "2": "Elephant for sale",
-      "3": "jakew24",
-      "4": "Brejcha",
-      "5": "Sept"
-    }
-    console.log(players)
 
     function resetHand(hand) {
       hand.rake = 0
@@ -24,23 +14,6 @@ $(document).ready(function(){
       hand.turn = []
       hand.river = []
       hand.showdown = []
-    }
-
-    var hand = {
-      "hero": "",
-      "tableDetails": {
-        "game": "TEXAS_HOLDEM",
-        "mode": "REALMONEY",
-        "limit": "NO_LIMIT"
-      },
-    }
-    resetHand(hand)
-    hand.stacks = {
-      "Brejcha": 100,
-      "Elephant for sale": 101.50,
-      "Madeinch1na": 99,
-      "Sept": 108.31,
-      "jakew24": 122.60
     }
 
     function addBlinds(xmlElement){
@@ -121,8 +94,14 @@ $(document).ready(function(){
     }
 
     function updateRake(xmlElement){
-      var rake = parseFloat(xmlElement.find("Rake").attr("change"))
-      var jackpotFee = parseFloat(xmlElement.find("JackpotFee").attr("change"))
+      var rake = 0,
+          jackpotFee = 0
+      if(xmlElement.find("Rake").length > 0){
+        rake = parseFloat(xmlElement.find("Rake").attr("change"))
+      }
+      if(xmlElement.find("JackpotFee").length > 0){
+        jackpotFee = parseFloat(xmlElement.find("JackpotFee").attr("change"))
+      }
       hand.rake += rake + jackpotFee
     }
 
@@ -134,19 +113,102 @@ $(document).ready(function(){
       }
     }
 
-    function checkForWinners(xmlElement){
-
+    function updateWinnerStack(xmlElement){
+      if(xmlElement.find("Winner").length > 0){
+        var winnerElement = xmlElement.find("Winner"),
+            id = winnerElement.attr("seat")
+        hand.stacks[players[id]] += parseFloat(winnerElement.attr("amount"))
+        handProgress = "endHand" // move state to endHand
+      }
     }
 
-    // newHand, preflop, flop, turn, river, showdown, endHand
-    var handProgress = "newHand"
+    function checkShowdown(xmlElement){
 
+      // showdown happening
+      if(xmlElement.find("Show").length > 0 || xmlElement.find("Muck").length > 0){
+
+        xmlElement.find("PlayerAction").each(function(){
+
+          // initialize variables
+          var playerActionElement = $(this),
+              showdownCards = {}
+
+          // show
+          if(playerActionElement.find("Show").length > 0){
+            // initialize variables
+            var id = playerActionElement.attr("seat"),
+                cards = []
+            // get shown cards
+            xmlElement.find("Card").each(function(){
+              cards.push($(this).text())
+            })
+            // save showdown cards
+            showdownCards[players[id]] = cards
+            hand.showdown.push(showdownCards)
+          }
+
+          // muck
+          if(playerActionElement.find("Muck").length > 0){
+            // initialize variables
+            var id = playerActionElement.attr("seat")
+            // save showdown muck action
+            showdownCards[players[id]] = "muck"
+            hand.showdown.push(showdownCards)
+          }
+        })
+      }
+    }
+
+    // declare global variables
+    var handProgress = "newHand"
+    var players = {}
+    var hand = {
+      "hero": "",
+      "stacks": {}
+    }
+    resetHand(hand)
+
+    // initialize stacks, players, and table meta-data
+    $(d).find("TableDetails").each(function(){
+
+      // table meta-data
+      hand.game = $(this).attr("game")
+      hand.limit = $(this).attr("limit")
+
+      // initialize stacks and players
+      $(this).find("Seat").each(function(){
+        var seatElement = $(this),
+            nickname = seatElement.find("PlayerInfo").attr("nickname")
+        players[seatElement.attr("id")] = nickname;
+        if(nickname != null){
+          hand.stacks[nickname] = parseFloat(seatElement.find("Chips").attr("stack-size"))
+        }
+      })
+
+      console.log(players)
+    })
+
+    // game updates
     $(d).find("Message").each(function(){
 
        switch (handProgress) {
 
         // ==[NEW HAND]========================================================
         case "newHand":
+
+          // update game state
+          if($(this).find("GameState").length > 0){
+            
+            $(this).find("Seat").each(function(){
+              var seatElement = $(this),
+                  nickname = seatElement.find("PlayerInfo").attr("nickname")
+              players[seatElement.attr("id")] = nickname;
+              if(nickname != null){
+                hand.stacks[nickname] = parseFloat(seatElement.find("Chips").attr("stack-size"))
+              }
+            })
+
+          }
 
           // initiate new hand and add blinds
           if($(this).find("NewHand").length > 0){
@@ -184,8 +246,11 @@ $(document).ready(function(){
 
             var flopUpdateElement = $(this)
 
-            // check for winners
+            // check for showdown
+            checkShowdown(flopUpdateElement)
 
+            // check for winners, and update stack as necessary
+            updateWinnerStack(flopUpdateElement)
 
             // update board
             updateBoard(flopUpdateElement, "DealingFlop")
@@ -213,6 +278,12 @@ $(document).ready(function(){
 
             var turnUpdateElement = $(this)
 
+            // check for showdown
+            checkShowdown(turnUpdateElement)
+
+            // check for winners, and update stack as necessary
+            updateWinnerStack(turnUpdateElement)
+
             // update board
             updateBoard(turnUpdateElement, "DealingTurn")
 
@@ -227,7 +298,6 @@ $(document).ready(function(){
               
               // print
               console.log("end of turn")
-              console.log(hand)
 
             }
           })
@@ -239,6 +309,12 @@ $(document).ready(function(){
 
             var riverUpdateElement = $(this)
 
+            // check for showdown
+            checkShowdown(riverUpdateElement)
+
+            // check for winners, and update stack as necessary
+            updateWinnerStack(riverUpdateElement)
+
             // update board
             updateBoard(riverUpdateElement, "DealingRiver")
 
@@ -247,7 +323,6 @@ $(document).ready(function(){
             
             // check if betting is over
             if(riverUpdateElement.find("PotsChange").length > 0){
-              handProgress = "endHand"  // move state to endHand
               updateStacks(riverUpdateElement) // update stacks based on bets
               updateRake(riverUpdateElement) // update rake
               
@@ -259,13 +334,29 @@ $(document).ready(function(){
           break
         
         case "endHand": // send hand to server
+
+          $(this).find("Changes").each(function(){
+
+            var endHandElement = $(this)
+
+            // check if hand is over
+            if(endHandElement.find("EndHand").length > 0){
+              // reset hand
+              handProgress = "newHand" // move state to newHand
+              console.log("end of hand")
+              console.log(hand)
+              // [TODO] send hand object to server
+              // resetHand(hand)
+            }
+
+          })
+
           break
 
         default:
           console.log("Hand logic broken")
       }
+    })
+  })
 
-    });
-  });
-
-});
+})

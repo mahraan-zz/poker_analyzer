@@ -1,10 +1,7 @@
 {
   "hero": "player1",
-  "tableDetails": {
-    "game":"TEXAS_HOLDEM",
-    "mode":"REALMONEY",
-    "limit":"NO_LIMIT",
-  },
+  "game":"TEXAS_HOLDEM",
+  "limit":"NO_LIMIT",
   "rake":"0",
   "stacks": {
     "player1": "1000",
@@ -14,8 +11,8 @@
     "player5": "1000",
     "player6": "1000"
   },
-  "board": "Ad, Ah, 2s, 2d, 5s",
-  "heroHoleCards": "As, Ac",
+  "board": ["Ad", "Ah", "2s", "2d", "5s"],
+  "heroHoleCards": ["As", "Ac"],
   "preflop": [
       {"player1": "5"},
       {"player2": "10"},
@@ -47,7 +44,7 @@
     ]
   },
   "showdown": [
-    "player1": "As, Ac",
+    "player1": ["As", "Ac"],
     "player5": "muck"
   ]
 }
