@@ -155,12 +155,12 @@
 				var playerActionElement = $(this),
 					showdownCardsJSON = {}
 
-				// show
+				// show 
 				if(playerActionElement.find("Show").length > 0){
 					// initialize variables
 					var seat_id = playerActionElement.attr("seat"),
 							cards = []
-					// get shown cards
+					// get shown cards (BUG: SOMETIMES WINNER MESSAGE IS INCLUDED AND WINNING 5 COMBINATION IS INCLUDED)
 					xmlElement.find("Card").each(function(){
 						cards.push($(this).text())
 					})
@@ -298,7 +298,7 @@
 							// record betting actions
 							recordBetting(flopUpdateElement, hand.flop)
 
-							// check if betting is over
+							// check if betting is over (BUG: NEED TO AMEND THIS LOGIC, POTS CHANGE DOESN'T GET SENT IF EVERYONE CHECKS)
 							if(flopUpdateElement.find("PotsChange").length > 0){
 								handProgress = "turn"  // move state to turn
 								updateStacks(flopUpdateElement) // update stacks based on bets
@@ -330,7 +330,7 @@
 							// record betting actions
 							recordBetting(turnUpdateElement, hand.turn)
 
-							// check if betting is over
+							// check if betting is over (BUG: NEED TO AMEND THIS LOGIC, POTS CHANGE DOESN'T GET SENT IF EVERYONE CHECKS)
 							if(turnUpdateElement.find("PotsChange").length > 0){
 								handProgress = "river"  // move state to river
 								updateStacks(turnUpdateElement) // update stacks based on bets
@@ -361,7 +361,7 @@
 							// record betting actions
 							recordBetting(riverUpdateElement, hand.river)
 
-							// check if betting is over
+							// check if betting is over (BUG: NEED TO AMEND THIS LOGIC, POTS CHANGE DOESN'T GET SENT IF EVERYONE CHECKS)
 							if(riverUpdateElement.find("PotsChange").length > 0){
 								updateStacks(riverUpdateElement) // update stacks based on bets
 								updateRake(riverUpdateElement) // update rake

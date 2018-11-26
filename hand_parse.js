@@ -354,7 +354,7 @@ $(document).ready(function(){
 						if(endHandElement.find("EndHand").length > 0){
 							// reset hand
 							handProgress = "newHand" // move state to newHand
-							console.log(hand)
+							console.log(JSON.stringify(hand))
 							// [TODO] send hand object to server
 							resetHand(hand)
 							console.log("end of hand")
