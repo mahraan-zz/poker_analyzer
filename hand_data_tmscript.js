@@ -23,7 +23,7 @@
 	// resets hand object after end of hand, called when EndHand message is received
 	function resetHand(hand) {
 		hand.rake = 0 // includes rake + jackpot fee 
-		hand.heroHoleCards = ""
+		hand.heroHoleCards = []
 		hand.board = []
 		hand.preflop = []
 		hand.flop = []
@@ -153,7 +153,7 @@
 
 				// initialize variables
 				var playerActionElement = $(this),
-					showdownCards = {}
+					showdownCardsJSON = {}
 
 				// show
 				if(playerActionElement.find("Show").length > 0){
@@ -165,8 +165,8 @@
 						cards.push($(this).text())
 					})
 					// save showdown cards
-					showdownCards[players[seat_id]] = cards
-					hand.showdown.push(showdownCards)
+					showdownCardsJSON[players[seat_id]] = cards
+					hand.showdown.push(showdownCardsJSON)
 				}
 
 				// muck
@@ -174,8 +174,8 @@
 					// initialize variables
 					var seat_id = playerActionElement.attr("seat")
 					// save showdown muck action
-					showdownCards[players[seat_id]] = "muck"
-					hand.showdown.push(showdownCards)
+					showdownCardsJSON[players[seat_id]] = "muck"
+					hand.showdown.push(showdownCardsJSON)
 				}
 			})
 		}
@@ -384,10 +384,10 @@
 							if(endHandElement.find("EndHand").length > 0){
 								// reset hand
 								handProgress = "newHand" // move state to newHand
-								console.log("end of hand")
 								console.log(hand)
 								// [TODO] send hand object to server
 								resetHand(hand)
+								console.log("end of hand")
 							}
 						})
 						break
