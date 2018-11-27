@@ -19,10 +19,10 @@
 	wsAddListener = wsAddListener.call.bind(wsAddListener)
 
 	// ==[functions]===========================================================
-	
+
 	// resets hand object after end of hand, called when EndHand message is received
 	function resetHand(hand) {
-		hand.rake = 0 // includes rake + jackpot fee 
+		hand.rake = 0 // includes rake + jackpot fee
 		hand.heroHoleCards = []
 		hand.board = []
 		hand.preflop = []
@@ -64,7 +64,7 @@
 	// record username and amount for various betting actions on a street, parses action messages during all streets
 	function recordBetting(xmlElement, street){
 		// looks for elements corresponding to potential actions
-		var checkElement = xmlElement.find("Check"), 
+		var checkElement = xmlElement.find("Check"),
 			callElement = xmlElement.find("Call"),
 			betElement = xmlElement.find("Bet"),
 			raiseElement = xmlElement.find("Raise"),
@@ -133,6 +133,16 @@
 		}
 	}
 
+	// searches for unique updating element for each street if everyone checks
+	function changeState(xmlElement, dealingElementTagName, currentStreet, nextStreet){
+		if(xmlElement.find(dealingElementTagName).length > 0){
+            console.log("everyone checks")
+            console.log("end of " + currentStreet)
+			handProgress = nextStreet
+			updateBoard(xmlElement, dealingElementTagName)
+		}
+	}
+
 	// parses Winner element and updates winner's stack size, sets the end of the hand
 	function updateWinnerStack(xmlElement){
 		if(xmlElement.find("Winner").length > 0){
@@ -155,13 +165,14 @@
 				var playerActionElement = $(this),
 					showdownCardsJSON = {}
 
-				// show 
+				// show
 				if(playerActionElement.find("Show").length > 0){
 					// initialize variables
-					var seat_id = playerActionElement.attr("seat"),
-							cards = []
-					// get shown cards (BUG: SOMETIMES WINNER MESSAGE IS INCLUDED AND WINNING 5 COMBINATION IS INCLUDED)
-					xmlElement.find("Card").each(function(){
+					var showElement = playerActionElement.find("Show"),
+						seat_id = playerActionElement.attr("seat"),
+						cards = []
+					// get shown cards
+					showElement.find("Card").each(function(){
 						cards.push($(this).text())
 					})
 					// save showdown cards
@@ -200,13 +211,14 @@
 			ws = new OrigWebSocket(url)
 		} else if (arguments.length >= 2) {
 			ws = new OrigWebSocket(url, protocols)
-		} else { 
+		} else {
 			ws = new OrigWebSocket() // No arguments (browsers will throw an error)
 		}
 		// Do something with event.data (received data) if you wish.
 		wsAddListener(ws, 'message', function(event) {
 
 			var d = $.parseXML(event.data)
+			console.log(d)
 
 			// initialize stacks, players, and table meta-data
 			$(d).find("TableDetails").each(function(){
@@ -298,7 +310,10 @@
 							// record betting actions
 							recordBetting(flopUpdateElement, hand.flop)
 
-							// check if betting is over (BUG: NEED TO AMEND THIS LOGIC, POTS CHANGE DOESN'T GET SENT IF EVERYONE CHECKS)
+							// update state if all bets are checks
+							changeState(flopUpdateElement, "DealingTurn", "flop", "turn", )
+
+							// check if betting is over
 							if(flopUpdateElement.find("PotsChange").length > 0){
 								handProgress = "turn"  // move state to turn
 								updateStacks(flopUpdateElement) // update stacks based on bets
@@ -330,7 +345,10 @@
 							// record betting actions
 							recordBetting(turnUpdateElement, hand.turn)
 
-							// check if betting is over (BUG: NEED TO AMEND THIS LOGIC, POTS CHANGE DOESN'T GET SENT IF EVERYONE CHECKS)
+							// update state if all bets are checks
+							changeState(turnUpdateElement, "DealingRiver", "turn", "river")
+
+							// check if betting is over
 							if(turnUpdateElement.find("PotsChange").length > 0){
 								handProgress = "river"  // move state to river
 								updateStacks(turnUpdateElement) // update stacks based on bets
@@ -361,7 +379,7 @@
 							// record betting actions
 							recordBetting(riverUpdateElement, hand.river)
 
-							// check if betting is over (BUG: NEED TO AMEND THIS LOGIC, POTS CHANGE DOESN'T GET SENT IF EVERYONE CHECKS)
+							// check if betting is over
 							if(riverUpdateElement.find("PotsChange").length > 0){
 								updateStacks(riverUpdateElement) // update stacks based on bets
 								updateRake(riverUpdateElement) // update rake
@@ -372,7 +390,7 @@
 							}
 						})
 						break
-					
+
 					// ==[END HAND]=======================================================
 					case "endHand": // send hand to server
 
@@ -384,7 +402,7 @@
 							if(endHandElement.find("EndHand").length > 0){
 								// reset hand
 								handProgress = "newHand" // move state to newHand
-								console.log(hand)
+								console.log(JSON.stringify(hand))
 								// [TODO] send hand object to server
 								resetHand(hand)
 								console.log("end of hand")
